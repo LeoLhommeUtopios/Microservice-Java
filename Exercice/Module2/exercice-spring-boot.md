@@ -39,7 +39,7 @@ Allez sur [start.spring.io](https://start.spring.io) et configurez :
 
 ### 2.1 Créer l'entité
 
-Créez `Product.java` avec les attributs suivants :
+Créez `User.java` avec les attributs suivants :
 
 | Attribut | Type | Contraintes |
 |----------|------|-------------|
@@ -63,10 +63,10 @@ Implémentez :
 
 ## Partie 3 : DTOs et Mapper 
 
-### 3.1 ProductDto (lecture)
+### 3.1 UserDto (lecture)
 
 ```java
-public record ProductDto(
+public record UserDto(
     Long id,
     String email,
     String firstName,
@@ -134,7 +134,7 @@ Implémentez les méthodes suivantes :
 ```java
 @Service
 @Transactional(readOnly = true)
-public class ProductService {
+public class UserService {
 
     // Injection du repository et mapper
 
@@ -142,9 +142,9 @@ public class ProductService {
 
     public UserDto findById(Long id) { ... }
 
-    public UserDto findBySku(String sku) { ... }
+    public UserDto findByEmail(String email) { ... }
 
-    public List<UserDto> findByCategory(String category) { ... }
+   public List<UserDto> search(String query){ ... }
 
     @Transactional
     public UserDto create(CreateUserRequest request) { ... }
@@ -154,9 +154,9 @@ public class ProductService {
 
     @Transactional
     public void delete(Long id) { ... }
-
     @Transactional
-    public void updateStock(Long id, Integer quantity) { ... }
+    public UserDto changeStatus(Long id, UserStatus status) {}
+
 }
 ```
 
@@ -223,13 +223,13 @@ management:
 
 ---
 
-## Partie 8 : Tests (20 min)
+## Partie 8 : Tests 
 
 ### 8.1 Tests unitaires du Service
 
 Testez avec Mockito :
-- `findById` avec produit existant
-- `findById` avec produit inexistant
+- `findById` avec User existant
+- `findById` avec Users inexistant
 - `create` avec succès
 - `create` avec email dupliqué
 
