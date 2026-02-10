@@ -25,7 +25,7 @@ public class GlobalExceptionHandler {
         log.warn("Product non trouvé : {}",ex.getMessage());
 
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
-        problemDetail.setTitle("Utilisateur non trouvé");
+        problemDetail.setTitle("Product non trouvé");
         problemDetail.setType(URI.create("https://api.example.com/errors/user-not-found"));
         problemDetail.setProperty("timestamp", Instant.now());
 

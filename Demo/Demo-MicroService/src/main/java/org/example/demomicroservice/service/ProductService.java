@@ -73,4 +73,9 @@ public class ProductService {
         return mapper.toDto(productSave);
     }
 
+    public boolean productExist (Long id){
+        repository.findById(id).orElseThrow(()-> new NotFoundException(id.toString()));
+        return true;
+    }
+
 }

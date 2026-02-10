@@ -15,6 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
+
 public class ProductController {
 
     private static final Logger log = LoggerFactory.getLogger(ProductController.class);
@@ -59,5 +60,10 @@ public class ProductController {
         log.info("Patch /api/products/{} - mise a jour partiel",id);
         ProductDto productDto= service.update(id,request);
         return ResponseEntity.ok(productDto);
+    }
+
+    @GetMapping("/exist/{id}")
+    public ResponseEntity<Boolean> productExist(@PathVariable long id){
+        return ResponseEntity.ok(service.productExist(id));
     }
 }
