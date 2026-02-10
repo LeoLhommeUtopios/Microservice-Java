@@ -15,12 +15,8 @@ public class UserAppService {
     }
 
     public UserApp registerUser (RegisterRequestDto registerRequestDto){
-        UserApp userApp= UserApp.builder()
-                .email(registerRequestDto.email())
-                .firstname(registerRequestDto.firstname())
-                .lastname(registerRequestDto.lastname())
-                .password(registerRequestDto.password())
-                .build();
+        UserApp userApp= new UserApp(registerRequestDto.getEmail(),registerRequestDto.getPassword(),registerRequestDto.getFirstname(),registerRequestDto.getLastname());
+
         return repository.save(userApp);
     }
 }

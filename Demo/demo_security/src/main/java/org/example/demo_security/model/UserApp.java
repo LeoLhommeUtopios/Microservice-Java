@@ -24,4 +24,12 @@ public class UserApp {
     private String firstname;
     private String password;
     private Role role = Role.USER;
+
+    public UserApp(String email, String password, String firstname, String lastname) {
+        this.email = email;
+        this.password = password;
+        this.firstname = firstname;
+        this.lastname = lastname;
+        role = Role.USER;
+    }
 }

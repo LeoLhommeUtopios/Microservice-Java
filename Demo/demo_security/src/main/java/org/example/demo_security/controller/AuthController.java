@@ -13,13 +13,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
+@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST})
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -35,11 +33,11 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto requestDto){
+    public ResponseEntity<String> login(@RequestBody LoginRequestDto requestDto){
         try{
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(requestDto.email(),requestDto.password()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            return ResponseEntity.ok(new LoginResponseDto(generator.generateToken(authentication)));
+            return ResponseEntity.ok(generator.generateToken(authentication));
         }catch (Exception ex){
             return  ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
