@@ -1,0 +1,67 @@
+# ===========================================
+# Configuration User Service
+# ===========================================
+
+server:
+  port: 8081
+
+spring:
+  application:
+    name: user-service
+
+  # Configuration de la base de données
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:users}
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:Root}
+    driver-class-name: com.mysql.jdbc.Driver
+
+  # Configuration JPA / Hibernate
+  jpa:
+    hibernate:
+      ddl-auto: update  # Création automatique des tables (dev uniquement)
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+  # Configuration des profils
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+# ===========================================
+# Logging
+# ===========================================
+logging:
+  level:
+    root: INFO
+    com.example.userservice: DEBUG
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# ===========================================
+# Actuator (Monitoring)
+# ===========================================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  info:
+    env:
+      enabled: true
+
+# ===========================================
+# Info application
+# ===========================================
+info:
+  app:
+    name: User Service
+    description: Microservice de gestion des utilisateurs
+    version: 1.0.0

@@ -1,0 +1,31 @@
+# ===========================================
+# Configuration Développement
+# ===========================================
+
+spring:
+  # Base de données en mémoire H2 pour le développement
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+
+  # Console H2 accessible sur /h2-console
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+logging:
+  level:
+    com.example.userservice: DEBUG
+    org.springframework.web: DEBUG
