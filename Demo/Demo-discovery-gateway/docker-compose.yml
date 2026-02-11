@@ -1,0 +1,194 @@
+# ===========================================
+# Docker Compose - Module 7 : Service Discovery & API Gateway
+# ===========================================
+# Usage:
+#   docker-compose up -d        # Demarrer tous les services
+#   docker-compose logs -f      # Voir les logs
+#   docker-compose down -v      # Arreter et supprimer les volumes
+#
+# Architecture:
+#   Client → API Gateway (:8080) → Eureka → User/Order Service
+#
+# URLs:
+#   Eureka Dashboard:  http://localhost:8761
+#   API Gateway:       http://localhost:8080
+#   User Service:      http://localhost:8081 (acces direct)
+#   Order Service:     http://localhost:8082 (acces direct)
+
+version: '3.8'
+
+services:
+  # ===========================================
+  # Eureka Server (Service Discovery)
+  # ===========================================
+  eureka-server:
+    build:
+      context: ./eureka-server
+      dockerfile: Dockerfile
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    environment:
+      JAVA_OPTS: "-Xmx256m -Xms128m"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8761/actuator/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    networks:
+      - microservices-network
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+          cpus: '0.5'
+
+  # ===========================================
+  # Base de donnees PostgreSQL
+  # ===========================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: microservices-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_MULTIPLE_DATABASES: users,orders
+    volumes:
+      - ../module4-docker/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - microservices-network
+
+  # ===========================================
+  # User Service (s'enregistre avec Eureka)
+  # ===========================================
+  user-service:
+    build:
+      context: ../module2-user-service
+      dockerfile: Dockerfile
+    container_name: user-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker,eureka
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: users
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      EUREKA_HOST: eureka-server
+      JAVA_OPTS: "-Xmx256m -Xms128m"
+    ports:
+      - "8081:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - microservices-network
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+          cpus: '0.5'
+
+  # ===========================================
+  # Order Service (s'enregistre avec Eureka)
+  # ===========================================
+  order-service:
+    build:
+      context: ../module3-order-service
+      dockerfile: Dockerfile
+    container_name: order-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker,eureka
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: orders
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      EUREKA_HOST: eureka-server
+      USER_SERVICE_URL: http://user-service:8080
+      JAVA_OPTS: "-Xmx256m -Xms128m"
+    ports:
+      - "8082:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - microservices-network
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+          cpus: '0.5'
+
+  # ===========================================
+  # API Gateway (route via Eureka)
+  # ===========================================
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    environment:
+      EUREKA_HOST: eureka-server
+      JAVA_OPTS: "-Xmx256m -Xms128m"
+    ports:
+      - "8080:8080"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+      order-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - microservices-network
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+          cpus: '0.5'
+
+# ===========================================
+# Volumes persistants
+# ===========================================
+volumes:
+  postgres_data:
+
+# ===========================================
+# Reseau Docker
+# ===========================================
+networks:
+  microservices-network:
+    driver: bridge

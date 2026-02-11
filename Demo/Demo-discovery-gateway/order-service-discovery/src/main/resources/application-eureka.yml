@@ -1,0 +1,30 @@
+# ===========================================
+# Profile "eureka" - Configuration supplementaire
+# a ajouter au order-service pour s'enregistrer avec Eureka
+# ===========================================
+# Activer avec : --spring.profiles.active=dev,eureka
+# ou dans Docker : SPRING_PROFILES_ACTIVE=docker,eureka
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_HOST:localhost}:8761/eureka/
+    registry-fetch-interval-seconds: 10
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port}:${random.value}
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
+
+# ===========================================
+# Avec Eureka, FeignClient utilise le nom du service
+# au lieu d'une URL statique
+# ===========================================
+# Avant (sans Eureka) :
+#   @FeignClient(name = "user-service", url = "${user-service.url}")
+#
+# Apres (avec Eureka) :
+#   @FeignClient(name = "user-service")
+#
+# Le load balancer Spring Cloud resout "user-service"
+# automatiquement via Eureka.

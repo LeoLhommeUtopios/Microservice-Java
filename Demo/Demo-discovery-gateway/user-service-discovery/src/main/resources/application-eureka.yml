@@ -1,0 +1,22 @@
+# ===========================================
+# Profile "eureka" - Configuration supplementaire
+# a ajouter au user-service pour s'enregistrer avec Eureka
+# ===========================================
+# Activer avec : --spring.profiles.active=dev,eureka
+# ou dans Docker : SPRING_PROFILES_ACTIVE=docker,eureka
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_HOST:localhost}:8761/eureka/
+    # Intervalle d'actualisation du registre
+    registry-fetch-interval-seconds: 10
+  instance:
+    # Utiliser l'IP au lieu du hostname (important dans Docker)
+    prefer-ip-address: true
+    # Identifiant unique de l'instance
+    instance-id: ${spring.application.name}:${server.port}:${random.value}
+    # Intervalle des heartbeats
+    lease-renewal-interval-in-seconds: 10
+    # Delai avant expiration
+    lease-expiration-duration-in-seconds: 30

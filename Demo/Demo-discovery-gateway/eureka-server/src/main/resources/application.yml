@@ -1,0 +1,32 @@
+server:
+  port: 8761
+
+spring:
+  application:
+    name: eureka-server
+
+eureka:
+  client:
+    # Le serveur Eureka ne s'enregistre pas lui-meme
+    register-with-eureka: false
+    fetch-registry: false
+  server:
+    # Desactiver la protection en dev (activer en prod)
+    enable-self-preservation: false
+    # Intervalle de nettoyage des instances mortes
+    eviction-interval-timer-in-ms: 5000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    root: INFO
+    com.netflix.eureka: WARN
+    com.netflix.discovery: WARN

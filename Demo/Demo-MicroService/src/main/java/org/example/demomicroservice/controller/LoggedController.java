@@ -1,6 +1,7 @@
 package org.example.demomicroservice.controller;
 
 import jakarta.validation.Valid;
+import org.example.demomicroservice.annotation.Login;
 import org.example.demomicroservice.dto.CreateProductRequest;
 import org.example.demomicroservice.dto.ProductDto;
 import org.example.demomicroservice.dto.UpdateProductRequest;
@@ -25,6 +26,7 @@ public class LoggedController {
         service = productService;
     }
 
+    @Login
     @PostMapping
     public ResponseEntity<ProductDto> create (@Valid @RequestBody CreateProductRequest request){
         log.info("Post /api/product creation d'un produit");
@@ -33,13 +35,14 @@ public class LoggedController {
         URI location = URI.create("/api/products/"+createdProduct.id());
         return ResponseEntity.created(location).body(createdProduct);
     }
-
+    @Login
     @PutMapping("/{id}")
     public ResponseEntity<ProductDto> update (@PathVariable Long id, @Valid @RequestBody UpdateProductRequest request){
         log.info("PUT /api/products/{} - mise a jour complete",id);
         ProductDto productDto= service.update(id,request);
         return ResponseEntity.ok(productDto);
     }
+    @Login
     @PatchMapping("/{id}")
     public ResponseEntity<ProductDto> updatePartial (@PathVariable Long id, @Valid @RequestBody UpdateProductRequest request){
         log.info("Patch /api/products/{} - mise a jour partiel",id);
